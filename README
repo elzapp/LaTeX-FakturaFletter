@@ -1,0 +1,18 @@
+#Create a data.yaml, like the one below:
+config:
+    orgname: "Organization name"
+    address:
+        - "Address line 1"
+        - "Address line 2"
+        - "5036 Bergen"
+    orgnr: "000 000 000"
+    kontonr: "0000 00 00000"
+    city: "Bergen"
+    counter: 0
+    typer:
+        B: ["Bedriftsmedlemskap",500]
+        P: ["Personlig medlemskap",200]
+        S: ["Studentmedlemskap",100]
+payers:
+    csv: "medlemmer.txt"
+
