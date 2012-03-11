@@ -1,5 +1,5 @@
 #Create a data.yaml, like the one below:
-'''yaml
+
 config:
     orgname: "Organization name"
     address:
@@ -16,4 +16,3 @@ config:
         S: ["Studentmedlemskap",100]
 payers:
     csv: "medlemmer.txt"
-'''
