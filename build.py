@@ -5,6 +5,10 @@ import csv
 import os
 import datetime
 
+from latex import LatexElement as LE
+from latex import LatexDocument
+from latex import LatexBlock
+
 data=yaml.load(open("data.yaml"))
 config=data["config"]
 orgname=config["orgname"]
@@ -38,30 +42,50 @@ for csvline in csvfile:
 	poststed=payer[3]
 	fakturanrf="2012-%04d" % (fakturanr)
 	(varelinje,total)=config["typer"][payer[4]]
-	formattedprice=("% 8.2f" % total)
+	formattedprice=("% 8.2f" % total).replace(".",",")
 	medlemsnr=payer[5]
 	fakturaer.append(fakturanrf)
 	with codecs.open("latex/faktura%s.tex" % fakturanrf, "w", encoding="UTF-8") as out:
 		sum=0.0
-		out.write(r"""\documentclass{no.oao.girofaktura}"""+"\n")
-		out.write(r"""\begin{document}"""+"\n")
-		out.write(r"""\input{config.tex}"""+"\n")
-		out.write(r"""\ToCompany{%s\\%s\\%s}""" % (navn,adresse,poststed)+"\n")
-		out.write(r"""\CustNo{%s}""" % (medlemsnr,)+"\n")
-		out.write(r"""\YourRef{}"""+"\n")
-		out.write(r"""\InvoiceNo{%s}""" % (fakturanr,)+"\n")
-		out.write(r"""\InvoiceDate{%s}""" % (invoicedate,)+"\n")
-		out.write(r"""\LastDate{%s}""" % (lastdate,)+"\n")
-		out.write(r"""\SumTot{%d}{00}""" % (total)+"\n")
-		out.write(r"""\InvoiceTop"""+"\n")
-		out.write(r"""\begin{Articles}"""+"\n")
+		ldoc=LatexDocument()
+		ldoc.append(LE("documentclass","no.oao.girofaktura"))
+		doc=ldoc.append(LatexBlock("document"))
+		doc.append(LE("input","config.tex"))
+		doc.append(LE("ToCompany","\\\\".join((navn,adresse,poststed))))
+		doc.append(LE("CustNo",medlemsnr))
+		doc.append(LE("YourRef",""))
+		doc.append(LE("InvoiceNo",fakturanrf))
+		doc.append(LE("InvoiceDate",invoicedate))
+		doc.append(LE("LastDate",lastdate))
+		doc.append(LE("SumTot",total,"00"))
+		doc.append(LE("InvoiceTop"))
+		art=doc.append(LatexBlock("Articles"))
+		art.append(LE("Article",varelinje,formattedprice))
+		art.append(LE("Divider"))
+		art.append(LE("Sum"))
+		doc.append(LE("InvoiceBottom"))
 
-		out.write(r"""\Article{%s}{%s}""" %(varelinje,formattedprice)+"\n")
-		out.write(r"""\Divider"""+"\n")
-		out.write(r"""\Sum"""+"\n")
-		out.write(r"""\end{Articles}"""+"\n")
-		out.write(r"""\InvoiceBottom"""+"\n")
-		out.write(r"""\end{document}""")
+		
+		#out.write(r"""\documentclass{no.oao.girofaktura}"""+"\n")
+		#out.write(r"""\begin{document}"""+"\n")
+		#out.write(r"""\input{config.tex}"""+"\n")
+		#out.write(r"""\ToCompany{%s\\%s\\%s}""" % (navn,adresse,poststed)+"\n")
+		#out.write(r"""\CustNo{%s}""" % (medlemsnr,)+"\n")
+		#out.write(r"""\YourRef{}"""+"\n")
+		#out.write(r"""\InvoiceNo{%s}""" % (fakturanr,)+"\n")
+		#out.write(r"""\InvoiceDate{%s}""" % (invoicedate,)+"\n")
+		#out.write(r"""\LastDate{%s}""" % (lastdate,)+"\n")
+		#out.write(r"""\SumTot{%d}{00}""" % (total)+"\n")
+		#out.write(r"""\InvoiceTop"""+"\n")
+		#out.write(r"""\begin{Articles}"""+"\n")
+
+		#out.write(r"""\Article{%s}{%s}""" %(varelinje,formattedprice)+"\n")
+		#out.write(r"""\Divider"""+"\n")
+		#out.write(r"""\Sum"""+"\n")
+		#out.write(r"""\end{Articles}"""+"\n")
+		#out.write(r"""\InvoiceBottom"""+"\n")
+		#out.write(r"""\end{document}""")
+		out.write(unicode(ldoc))
 
 os.chdir("latex")
 for faktura in fakturaer:
